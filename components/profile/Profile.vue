@@ -1,6 +1,6 @@
 <template>
   <div class="profile-form">
-    <div v-if="user.is_admin && user.is_superuser">
+    <div v-if="!user.img">
       <Avatar
         size="110"
         :style="{
@@ -10,12 +10,13 @@
         {{ user && user.name ? user.name[0].toUpperCase() : 'A' }}
       </Avatar>
     </div>
-    <div v-else>
-      <Avatar v-if="user && user.img"
-              size="130" :src="user.img"
+    <div v-else @click="openModalImg">
+      <Avatar size="130"
+              :src="user.img"
               :style="{
-                border: '1px solid #deece7'
-              }"/>
+                border: '1px solid #deece7',
+                cursor: 'pointer'
+              }" />
     </div>
     <h1>{{ user.name || 'Admin'}}</h1>
     <div>
@@ -112,6 +113,24 @@
     <UpdateModal ref="refUpdateModal"
                  :is-update="true"
                  :family-tree="familyTree"/>
+
+    <Modal
+      v-model="visibleImg"
+      title=""
+      :footer-hide="true"
+      class-name="vertical-center-modal"
+    >
+      <div :style="{ 'text-align': 'center' }">
+        <img
+          :src="user.img"
+          :style="{
+            'object-fit': 'cover',
+            'width': '100%',
+            'max-height': '700px',
+          }"
+        />
+      </div>
+    </Modal>
   </div>
 </template>
 
@@ -131,7 +150,8 @@
 
     data() {
       return {
-        familyTree: []
+        familyTree: [],
+        visibleImg: false,
       }
     },
 
@@ -178,6 +198,10 @@
         } catch (e) {
           console.log('error: ', e)
         }
+      },
+
+      openModalImg() {
+        this.visibleImg = true
       },
     }
   }

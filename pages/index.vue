@@ -54,7 +54,7 @@
 
 <script>
 import { graphic } from 'echarts'
-import { mappingChartEducations, mappingGender } from '../constants/mapping'
+import { mappingChartEducations, mappingGender } from '~/constants/mapping'
 
 export default {
   name: 'HomePage',

@@ -91,7 +91,7 @@
               <MenuItem v-else :name="item.key" :title="item.title">
                 <NuxtLink :to="item.path">
                   <Icon :type="item.icon" :style="item.styleIcon" />
-                  <div class="title">Trang chủ</div>
+                  <div v-if="openSidebar" class="title">{{ item.title }}</div>
                 </NuxtLink>
               </MenuItem>
             </div>

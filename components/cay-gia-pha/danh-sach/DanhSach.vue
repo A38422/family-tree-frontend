@@ -100,11 +100,11 @@
 
 <script>
   import { mapGetters } from 'vuex'
-  import { mappingGender } from '../../../constants/mapping'
-  import { formatDate } from '../../../utils/dateFormatter'
   import DetailMemberModal from '../DetailMemberModal'
   import CreateOrUpdateMemberModal from '../CreateOrUpdateMemberModal'
   import ConfirmModal from '../../base/ConfirmModal'
+  import { mappingGender } from '~/constants/mapping'
+  import { formatDate } from '~/utils/dateFormatter'
 
   export default {
     name: 'DanhSach',

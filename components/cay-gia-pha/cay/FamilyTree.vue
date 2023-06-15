@@ -26,7 +26,7 @@
 import { mapGetters } from 'vuex'
 import FamilyTree from '@balkangraph/familytree.js'
 import CreateOrUpdateMemberModal from '../CreateOrUpdateMemberModal'
-import { educations } from '../../../constants/dataSelect'
+import { educations } from '~/constants/dataSelect'
 
 export default {
   name: 'FamilyTree',
@@ -306,6 +306,7 @@ export default {
         const res = await this.$axios.$get(this.$api.GET_FAMILY_TREE, {
           params: {
             query_all: true,
+            ordering: 'id'
           },
         })
         this.nodes = res.map((item) => {
@@ -366,10 +367,10 @@ export default {
               icon: FamilyTree.icon.edit(24, 24, '#fff'),
               text: 'Edit',
             },
-            share: {
-              icon: FamilyTree.icon.share(24, 24, '#fff'),
-              text: 'Share',
-            },
+            // share: {
+            //   icon: FamilyTree.icon.share(24, 24, '#fff'),
+            //   text: 'Share',
+            // },
             pdf: {
               icon: FamilyTree.icon.pdf(24, 24, '#fff'),
               text: 'Save as PDF',

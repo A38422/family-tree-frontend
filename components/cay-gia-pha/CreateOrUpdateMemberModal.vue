@@ -57,6 +57,35 @@
               placeholder="Nhập địa chỉ"
             ></Input>
           </FormItem>
+          <div v-if="!isUpdate" class="flex-row">
+            <div :style="{ width: '130px' }">Tạo tài khoản?</div>
+            <iSwitch v-model="isCreateLogin" size="small" @on-change="handleChangeSwitch"/>
+          </div>
+          <br>
+          <div v-if="!isUpdate && isCreateLogin">
+            <FormItem label="Tài khoản" prop="username">
+              <Input v-model="formState.username"
+                     placeholder="Nhập tài khoản">
+              </Input>
+            </FormItem>
+            <FormItem label="Mật khẩu" prop="password">
+              <Input
+                v-model="formState.password"
+                type="password"
+                password
+                placeholder="Nhập mật khẩu">
+              </Input>
+            </FormItem>
+            <FormItem label="Nhập lại mật khẩu"
+                      prop="rePassword">
+              <Input
+                v-model="formState.rePassword"
+                type="password"
+                password
+                placeholder="Nhập lại mật khẩu">
+              </Input>
+            </FormItem>
+          </div>
         </Col>
         <Col :span="12">
           <FormItem label="Bố (nếu có)" prop="fid">
@@ -264,7 +293,7 @@
 </template>
 
 <script>
-import { educations, roles } from '../../constants/dataSelect'
+import { educations, roles } from '~/constants/dataSelect'
 
 export default {
   name: 'CreateOrUpdateMemberModal',
@@ -313,10 +342,14 @@ export default {
         isAdmin: 'member',
         education: 'none',
         achievement: null,
+        username: null,
+        password: null,
+        rePassword: null,
       },
       uploadList: [],
       defaultList: [],
       visibleImg: false,
+      isCreateLogin: false,
     }
   },
 
@@ -328,7 +361,9 @@ export default {
     rules() {
       return {
         name: [
-          { required: true, message: 'Vui lòng nhập họ tên', trigger: 'blur' },
+          { required: true,
+            message: 'Vui lòng nhập họ tên',
+            trigger: 'blur' },
         ],
         gender: [
           {
@@ -341,6 +376,27 @@ export default {
           {
             required: true,
             message: 'Vui lòng nhập ngày sinh',
+            trigger: 'blur',
+          },
+        ],
+        username: [
+          {
+            required: true,
+            validator: this.checkUsername,
+            trigger: 'blur',
+          },
+        ],
+        password: [
+          {
+            required: true,
+            validator: this.validatePass,
+            trigger: 'blur',
+          },
+        ],
+        rePassword: [
+          {
+            required: true,
+            validator: this.validateRePass,
             trigger: 'blur',
           },
         ],
@@ -368,11 +424,11 @@ export default {
     },
 
     listEducations() {
-      return educations || []
+      return educations
     },
 
     listRoles() {
-      return roles || []
+      return roles
     },
   },
 
@@ -402,11 +458,19 @@ export default {
           const sourceApi = this.isUpdate
             ? `${this.$api.UPDATE_FAMILY_TREE}${this.formState.id}/`
             : this.$api.CREATE_FAMILY_TREE
-          if (this.formState.generation || this.formState.generation === '')
+          if (this.formState.generation || this.formState.generation === '') {
             delete this.formState.generation
+          }
+          const createUser = this.formState.username && this.formState.password && this.formState.rePassword
+            ? {
+              username: this.formState.username,
+              password: this.formState.password
+            }
+            : null
           await this.$axios[method](sourceApi, {
             ...this.formState,
             pids: pid,
+            user: createUser,
             fid: this.formState.fid ? Number(this.formState.fid) : null,
             mid: this.formState.mid ? Number(this.formState.mid) : null,
             is_admin: this.formState.isAdmin === 'admin',
@@ -428,6 +492,11 @@ export default {
             content: 'Không được phép thực hiện hành động này',
             closable: true,
           })
+        } else if (e && e.response && e.response.data && e.response.data[0].includes('Tài khoản')) {
+          this.$Message.error({
+            content: e.response.data[0],
+            closable: true,
+          })
         } else {
           this.$Message.error({
             content: `${this.isUpdate ? 'Cập nhật' : 'Thêm mới'} thất bại`,
@@ -435,6 +504,32 @@ export default {
           })
         }
       }
+    },
+
+    validatePass(rule, value, callback) {
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/
+      if (!value) {
+        return callback(new Error('Vui lòng nhập mật khẩu'))
+      } else if (!passwordRegex.test(value)) {
+        return callback(new Error('Mật khẩu phải từ 8 ký tự bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt'))
+      }
+      callback()
+    },
+
+    validateRePass(rule, value, callback) {
+      if (!value) {
+        return callback(new Error('Vui lòng nhập lại mật khẩu'))
+      } else if (value !== this.formState.password) {
+        return callback(new Error('Mật khẩu không trùng khớp'))
+      }
+      callback()
+    },
+
+    checkUsername(rule, value, callback) {
+      if (!value) {
+        return callback(new Error('Vui lòng nhập tài khoản'))
+      }
+      callback()
     },
 
     handleView() {
@@ -485,6 +580,12 @@ export default {
       return check
     },
 
+    handleChangeSwitch() {
+      this.formState.username = ''
+      this.formState.password = ''
+      this.formState.rePassword = ''
+    },
+
     setFormState(data) {
       this.formState =
         data && data.id
@@ -492,6 +593,9 @@ export default {
               ...data,
               pids: data.pids && data.pids.length > 0 ? data.pids[0] : null,
               isAdmin: data.is_admin ? 'admin' : 'member',
+              username: null,
+              password: null,
+              rePassword: null
             }
           : {
               generation: '',
@@ -510,6 +614,9 @@ export default {
               isAdmin: 'member',
               education: 'none',
               achievement: null,
+              username: null,
+              password: null,
+              rePassword: null
             }
 
       this.defaultList =
@@ -529,6 +636,7 @@ export default {
 
     handleChangeVisible(value) {
       if (!value) {
+        this.isCreateLogin = false
         this.$refs.form.resetFields()
         this.uploadList = []
         this.$refs.upload.fileList = []

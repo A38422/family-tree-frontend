@@ -7,7 +7,7 @@ const breadCrumb = {
     title: 'Cây gia phả',
     disabled: true,
   },
-  cay: {
+  'cay': {
     title: 'Cây',
     disabled: false,
   },
@@ -31,11 +31,11 @@ const breadCrumb = {
     title: 'Loại chi',
     disabled: false,
   },
-  thu: {
+  'thu': {
     title: 'Thu',
     disabled: false,
   },
-  chi: {
+  'chi': {
     title: 'Chi',
     disabled: false,
   },
@@ -43,9 +43,13 @@ const breadCrumb = {
     title: 'Báo cáo',
     disabled: false,
   },
-  profile: {
+  'profile': {
     title: 'Thông tin cá nhân',
     disabled: false,
+  },
+  'su-kien': {
+    title: 'Sự kiện',
+    disabled: false
   },
 }
 export default breadCrumb

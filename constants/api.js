@@ -35,6 +35,9 @@ const apiUrl = {
 
   // family tree statistics
   FAMILY_TREE_STATISTICS: 'api/family-tree-statistics/',
+
+  // event
+  EVENT: 'api/event/',
 }
 
 export default apiUrl

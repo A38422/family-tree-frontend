@@ -1,12 +1,12 @@
 <template>
-  <div class="list-chi">
-    <Tabs :value="tabSelected" :animated="false" @on-click="handleClickTab">
-      <TabPane label="Chi" name="chi"></TabPane>
-      <TabPane label="Loại chi" name="loai-chi"></TabPane>
-    </Tabs>
+  <div class="list-event">
+    <!--    <Tabs :value="tabSelected" :animated="false" @on-click="handleClickTab">-->
+    <!--      <TabPane label="Chi" name="chi"></TabPane>-->
+    <!--      <TabPane label="Loại chi" name="loai-chi"></TabPane>-->
+    <!--    </Tabs>-->
     <div class="header-table">
       <div :style="{ display: 'flex', gap: '10px' }">
-        <div >
+        <div>
           <span class="mr-5">Tìm kiếm</span>
           <Input
             v-model="searchValue"
@@ -30,7 +30,7 @@
         </div>
       </div>
       <Button v-if="isAdmin" type="success" @click="openModal(false)">
-        <Icon type="md-add" size="18" />
+        <Icon type="md-add" size="18"/>
         Thêm mới
       </Button>
     </div>
@@ -43,14 +43,11 @@
         :data="data"
         :loading="loading"
       >
-        <template slot="category" slot-scope="{ row }">
-          <span>{{ row.category ? row.category.name : '-' }}</span>
-        </template>
-        <template slot="amount" slot-scope="{ row }">
-          <span>{{ parseAmount(row.amount) }}</span>
-        </template>
         <template slot="date" slot-scope="{ row }">
-          <span>{{ format(row.date) }}</span>
+          <span>{{ format(row) }}</span>
+        </template>
+        <template slot="attendees" slot-scope="{ row }">
+          <span class="text-primary cursor" @click="handleShowAttendees(row)">{{ Attendees(row) }}</span>
         </template>
         <template slot="action" slot-scope="{ row }">
           <Icon
@@ -83,9 +80,12 @@
       />
     </div>
 
+    <DetailAttendeesModal ref="refDetailAttendeesModal"
+                          :family-tree="familyTree"/>
+
     <CreateOrUpdateModal
       ref="refCreateOrUpdateModal"
-      :data-loai-chi="dataLoaiChi"
+      :family-tree="familyTree"
       :data-edit="dataSelected"
       :is-update="isUpdate"
       @on-ok="handleSuccess"
@@ -95,7 +95,7 @@
       ref="refConfirmModal"
       title="Xác nhận xoá"
       text="Hành động này sẽ xóa loại chi này. Bạn đồng ý thực hiện?"
-      @on-ok="deleteChi"
+      @on-ok="deleteEvent"
     />
   </div>
 </template>
@@ -103,8 +103,9 @@
 <script>
 import { mapGetters } from 'vuex'
 import { convertDateFormat, formatDate } from '~/utils/dateFormatter'
-import CreateOrUpdateModal from '~/components/tai-chinh/danh-sach-chi/CreateOrUpdateModal.vue'
-import ConfirmModal from '~/components/base/ConfirmModal'
+import CreateOrUpdateModal from '~/components/su-kien/CreateOrUpdateModal.vue'
+import ConfirmModal from '~/components/base/ConfirmModal.vue'
+import DetailAttendeesModal from '~/components/su-kien/DetailAttendeesModal.vue'
 
 export default {
   name: 'DanhSach',
@@ -112,6 +113,7 @@ export default {
   components: {
     CreateOrUpdateModal,
     ConfirmModal,
+    DetailAttendeesModal
   },
 
   data() {
@@ -120,41 +122,51 @@ export default {
         {
           title: 'STT',
           key: 'stt',
-          width: '70px',
+          width: 70
         },
         {
-          title: 'Loại chi',
-          slot: 'category',
+          title: 'Tên sự kiện',
+          key: 'name'
         },
         {
-          title: 'Số tiền (VNĐ)',
-          slot: 'amount',
+          title: 'Địa điểm',
+          key: 'location'
         },
         {
-          title: 'Ngày chi',
+          title: 'Ngày diễn ra',
           slot: 'date',
+          width: 140
+        },
+        {
+          title: 'Mô tả',
+          key: 'description'
+        },
+        {
+          title: 'Số lượng tham gia',
+          slot: 'attendees',
+          width: 180
         },
         {
           title: 'Hành động',
           slot: 'action',
           width: 150,
-          align: 'center',
-        },
+          align: 'center'
+        }
       ],
       isUpdate: false,
       loading: false,
       data: [],
-      dataLoaiChi: [],
+      familyTree: [],
       dataSelected: {},
       query: {
         page: 1,
-        pageSize: 10,
+        pageSize: 10
       },
       total: 0,
       searchValue: '',
       timeRange: [],
       idDelete: null,
-      tabSelected: 'chi',
+      tabSelected: 'loai-chi'
     }
   },
 
@@ -163,7 +175,7 @@ export default {
 
     isAdmin() {
       return !!(this.user && this.user.is_admin)
-    },
+    }
   },
 
   watch: {
@@ -172,32 +184,32 @@ export default {
       deep: true,
       handler() {
         this.getData()
-      },
-    },
+      }
+    }
   },
 
   created() {
-    this.getLoaiChi()
+    this.getAllData()
 
-    if (this.$route.query && this.$route.query.search)
+    if (this.$route.query && this.$route.query.search) {
       this.searchValue = this.$route.query.search
-    if (this.$route.query && this.$route.query.page)
+    }
+    if (this.$route.query && this.$route.query.page) {
       this.query.page = this.$route.query.page
+    }
     if (this.$route.query && this.$route.query.date_before && this.$route.query.date_after) {
       this.timeRange = [formatDate(this.$route.query.date_before), formatDate(this.$route.query.date_after)]
     }
   },
 
   methods: {
-    async getLoaiChi() {
+    async getAllData() {
       try {
-        this.loading = true
-        const res = await this.$axios.$get(this.$api.EXPENSE_CATEGORIES, {
+        this.familyTree = await this.$axios.$get(this.$api.GET_FAMILY_TREE, {
           params: {
-            query_all: true,
-          },
+            query_all: true
+          }
         })
-        this.dataLoaiChi = res
       } catch (e) {
         console.log('error: ', e)
       }
@@ -207,19 +219,18 @@ export default {
       try {
         const query = {
           ...this.query,
-          ...this.$route.query,
+          ...this.$route.query
         }
         this.loading = true
-        const res = await this.$axios.$get(this.$api.EXPENSES, {
+        const res = await this.$axios.$get(this.$api.EVENT, {
           params: {
             ...query,
-            ordering: '-id',
-          },
+          }
         })
         this.data = res.results.map((item, index) => {
           return {
             ...item,
-            stt: index + 1 + 10 * (this.query.page - 1),
+            stt: index + 1 + 10 * (this.query.page - 1)
           }
         })
         this.total = res.count
@@ -235,20 +246,20 @@ export default {
 
       const query = {
         ...this.$route.query,
-        page,
+        page
       }
 
       this.$router.push({
         query: {
-          ...query,
-        },
+          ...query
+        }
       })
     },
 
     handleSearch() {
       const query = {
         ...this.$route.query,
-        search: this.searchValue,
+        search: this.searchValue
       }
 
       this.query.page = 1
@@ -257,8 +268,8 @@ export default {
 
       this.$router.push({
         query: {
-          ...query,
-        },
+          ...query
+        }
       })
     },
 
@@ -304,13 +315,13 @@ export default {
       this.getData()
     },
 
-    async deleteChi() {
+    async deleteEvent() {
       try {
         this.loading = true
-        await this.$axios.$delete(`${this.$api.EXPENSES}${this.idDelete}/`)
+        await this.$axios.$delete(`${this.$api.EVENT}${this.idDelete}/`)
         this.$Message.success({
           content: 'Xóa thành thành công',
-          closable: true,
+          closable: true
         })
         this.handleSuccess()
       } catch (e) {
@@ -319,34 +330,39 @@ export default {
         if (e && e.response && e.response.status === 403) {
           this.$Message.error({
             content: 'Không được phép thực hiện hành động này',
-            closable: true,
+            closable: true
           })
         } else {
           this.$Message.error({
             content: 'Xóa thất thất bại',
-            closable: true,
+            closable: true
           })
         }
       }
     },
 
-    parseAmount(value) {
-      return `${Number(value)}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+    format(row) {
+      return row && row.date ? formatDate(row.date) : '-'
     },
 
-    format(value) {
-      return formatDate(value)
+    Attendees(row) {
+      return row && row.attendees && row.attendees.length > 0 ? row.attendees.length : 0
+    },
+
+    handleShowAttendees(row) {
+      this.$refs.refDetailAttendeesModal.open()
+      this.$refs.refDetailAttendeesModal.setData(row.attendees)
     },
 
     handleClickTab(value) {
       if (value === 'chi') this.$router.push('/tai-chinh/chi')
       else if (value === 'loai-chi') this.$router.push('/tai-chinh/loai-chi')
-    },
-  },
+    }
+  }
 }
 </script>
 <style lang="less">
-.list-chi {
+.list-event {
   height: 100%;
   width: 100%;
   display: flex;
@@ -394,4 +410,11 @@ export default {
     width: 200px;
   }
 }
+
+.text-primary {
+  color: #0052CC;
+  fill: #0052CC;
+}
+
+
 </style>

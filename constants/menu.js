@@ -10,7 +10,7 @@ const menu = [
     key: '1',
     title: 'Cây gia phả',
     icon: 'ios-git-network',
-    styleIcon: {},
+    styleIcon: '',
     children: [
       {
         key: '1-1',
@@ -28,7 +28,7 @@ const menu = [
     key: '2',
     title: 'Tài chính',
     icon: 'logo-usd',
-    styleIcon: {},
+    styleIcon: '',
     children: [
       // {
       //   key: '2-1',
@@ -76,6 +76,13 @@ const menu = [
         path: '/tai-chinh/bao-cao',
       },
     ],
+  },
+  {
+    key: '3',
+    title: 'Sự kiện',
+    icon: 'md-calendar',
+    styleIcon: {},
+    path: '/su-kien',
   },
 ]
 export default menu
