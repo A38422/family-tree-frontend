@@ -8,7 +8,11 @@
         >
       </div>
       <FormItem label="Tài khoản" prop="username">
-        <Input v-model="vm.username" placeholder="Nhập tài khoản" @keyup.enter.native="login">
+        <Input
+          v-model="vm.username"
+          placeholder="Nhập tài khoản"
+          @keyup.enter.native="login"
+        >
           <Icon slot="prepend" type="ios-person-outline"></Icon>
         </Input>
       </FormItem>
@@ -169,6 +173,7 @@ export default {
   border-radius: 5px;
   border: 1px solid #deece7;
   /*box-shadow: 0 3px 8px 2px rgba(0, 0, 0, 0.1);*/
+  z-index: 2;
 
   .ivu-input-suffix {
     z-index: 3;

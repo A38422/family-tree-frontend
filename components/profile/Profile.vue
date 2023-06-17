@@ -6,19 +6,22 @@
         :style="{
           background: '#0097a7',
           fontFamily: 'arial, sans-serif',
-        }">
+        }"
+      >
         {{ user && user.name ? user.name[0].toUpperCase() : 'A' }}
       </Avatar>
     </div>
     <div v-else @click="openModalImg">
-      <Avatar size="130"
-              :src="user.img"
-              :style="{
-                border: '1px solid #deece7',
-                cursor: 'pointer'
-              }" />
+      <Avatar
+        size="130"
+        :src="user.img"
+        :style="{
+          border: '1px solid #deece7',
+          cursor: 'pointer',
+        }"
+      />
     </div>
-    <h1>{{ user.name || 'Admin'}}</h1>
+    <h1>{{ user.name || 'Admin' }}</h1>
     <div>
       <Button type="info" ghost @click="handleOpenModal">
         <Icon type="md-create" />
@@ -69,7 +72,7 @@
             <Col span="8">Địa chỉ</Col>
             <Col>{{ user.address || '-' }}</Col>
           </Row>
-          <br>
+          <br />
           <Row>
             <Col span="8">Bố</Col>
             <Col>{{ user.fid ? user.fid.name : '-' }}</Col>
@@ -82,7 +85,9 @@
           <br />
           <Row>
             <Col span="8">Vợ/chồng</Col>
-            <Col>{{ user.pids && user.pids.length > 0 ? user.pids[0].name : '-' }}</Col>
+            <Col>{{
+              user.pids && user.pids.length > 0 ? user.pids[0].name : '-'
+            }}</Col>
           </Row>
           <br />
           <Row>
@@ -105,14 +110,16 @@
 
     <div class="logout">
       <NuxtLink to="/login">
-        <Icon size="20" type="ios-exit-outline"/>
+        <Icon size="20" type="ios-exit-outline" />
         Đăng xuất
       </NuxtLink>
     </div>
 
-    <UpdateModal ref="refUpdateModal"
-                 :is-update="true"
-                 :family-tree="familyTree"/>
+    <UpdateModal
+      ref="refUpdateModal"
+      :is-update="true"
+      :family-tree="familyTree"
+    />
 
     <Modal
       v-model="visibleImg"
@@ -125,7 +132,7 @@
           :src="user.img"
           :style="{
             'object-fit': 'cover',
-            'width': '100%',
+            width: '100%',
             'max-height': '700px',
           }"
         />
@@ -135,95 +142,97 @@
 </template>
 
 <script>
-  import { mapGetters } from 'vuex'
-  import { mappingEducations, mappingGender } from '../../constants/mapping'
-  import { formatDate } from '../../utils/dateFormatter'
-  import UpdateModal from './UpdateModal'
+import { mapGetters } from 'vuex'
+import { mappingEducations, mappingGender } from '../../constants/mapping'
+import { formatDate } from '../../utils/dateFormatter'
+import UpdateModal from './UpdateModal'
 
-  export default {
+export default {
+  name: 'UserProfile',
 
-    name: 'UserProfile',
+  components: {
+    UpdateModal,
+  },
 
-    components: {
-      UpdateModal
+  data() {
+    return {
+      familyTree: [],
+      visibleImg: false,
+    }
+  },
+
+  computed: {
+    ...mapGetters(['user']),
+  },
+
+  created() {
+    this.getAllData()
+  },
+
+  methods: {
+    gender(value) {
+      return value ? mappingGender[value] : '-'
     },
 
-    data() {
-      return {
-        familyTree: [],
-        visibleImg: false,
+    format(date) {
+      return date ? formatDate(date) : '-'
+    },
+
+    getEducation(value) {
+      return value ? mappingEducations[value] : '-'
+    },
+
+    handleOpenModal() {
+      if (!this.user.is_superuser) {
+        this.$refs.refUpdateModal.open()
+        this.$refs.refUpdateModal.setFormState({
+          ...this.user,
+          mid: this.user && this.user.mid ? this.user.mid.id : null,
+          fid: this.user && this.user.fid ? this.user.fid.id : null,
+          pids:
+            this.user && this.user.pids && this.user.pids.length > 0
+              ? this.user.pids[0].id
+              : [],
+        })
       }
     },
 
-    computed: {
-      ...mapGetters(['user'])
+    async getAllData() {
+      try {
+        this.familyTree = await this.$axios.$get(this.$api.GET_FAMILY_TREE, {
+          params: {
+            query_all: true,
+          },
+        })
+      } catch (e) {
+        console.log('error: ', e)
+      }
     },
 
-    created() {
-      this.getAllData()
+    openModalImg() {
+      this.visibleImg = true
     },
-
-    methods: {
-      gender(value) {
-        return value ? mappingGender[value] : '-'
-      },
-
-      format(date) {
-        return date ? formatDate(date) : '-'
-      },
-
-      getEducation(value) {
-        return value ? mappingEducations[value] : '-'
-      },
-
-      handleOpenModal() {
-        if (!this.user.is_superuser) {
-          this.$refs.refUpdateModal.open()
-          this.$refs.refUpdateModal.setFormState({
-            ...this.user,
-            mid: this.user && this.user.mid ? this.user.mid.id : null,
-            fid: this.user && this.user.fid ? this.user.fid.id : null,
-            pids: this.user && this.user.pids && this.user.pids.length > 0 ? this.user.pids[0].id : [],
-          })
-        }
-      },
-
-      async getAllData() {
-        try {
-          this.familyTree = await this.$axios.$get(this.$api.GET_FAMILY_TREE, {
-            params: {
-              query_all: true
-            }
-          })
-        } catch (e) {
-          console.log('error: ', e)
-        }
-      },
-
-      openModalImg() {
-        this.visibleImg = true
-      },
-    }
-  }
+  },
+}
 </script>
 <style lang="less">
-  .profile-form {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+.profile-form {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 
-    .logout {
-      a {
-        font-size: 16px;
-        color: #515a6e !important;
-      }
+  .logout {
+    a {
+      font-size: 16px;
+      color: #515a6e !important;
+    }
 
-      a:hover {
-        color: #2d8cf0 !important;
-      }
+    a:hover {
+      color: #2d8cf0 !important;
     }
   }
+}
 </style>

@@ -47,7 +47,7 @@
             :label="item.name"
           >
             <span>{{ item.id }}.</span>
-            <Avatar v-if="item.img" :src="item.img" class="mx-5"/>
+            <Avatar v-if="item.img" :src="item.img" class="mx-5" />
             <Avatar
               v-else
               src="http://localhost:8000/media/images/no-avt.png"
@@ -77,7 +77,7 @@ export default {
       type: Array,
       default() {
         return []
-      }
+      },
     },
 
     isUpdate: {
@@ -128,7 +128,7 @@ export default {
     },
 
     listAttendees() {
-      return this.familyTree.filter(item => !item.ddate)
+      return this.familyTree.filter((item) => !item.ddate)
     },
   },
 
@@ -194,7 +194,7 @@ export default {
               name: '',
               date: null,
               description: '',
-              attendees: []
+              attendees: [],
             }
     },
 

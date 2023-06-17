@@ -20,17 +20,19 @@
         </div>
         <div>
           <span>Thời gian</span>
-          <DatePicker :value="timeRange"
-                      format="dd/MM/yyyy"
-                      type="daterange"
-                      placement="bottom-end"
-                      placeholder="Bắt đầu - Kết thúc"
-                      :style="{ width: '200px' }"
-                      @on-change="handleChangeTime"></DatePicker>
+          <DatePicker
+            :value="timeRange"
+            format="dd/MM/yyyy"
+            type="daterange"
+            placement="bottom-end"
+            placeholder="Bắt đầu - Kết thúc"
+            :style="{ width: '200px' }"
+            @on-change="handleChangeTime"
+          ></DatePicker>
         </div>
       </div>
       <Button v-if="isAdmin" type="success" @click="openModal(false)">
-        <Icon type="md-add" size="18"/>
+        <Icon type="md-add" size="18" />
         Thêm mới
       </Button>
     </div>
@@ -47,7 +49,9 @@
           <span>{{ format(row) }}</span>
         </template>
         <template slot="attendees" slot-scope="{ row }">
-          <span class="text-primary cursor" @click="handleShowAttendees(row)">{{ Attendees(row) }}</span>
+          <span class="text-primary cursor" @click="handleShowAttendees(row)">{{
+            Attendees(row)
+          }}</span>
         </template>
         <template slot="action" slot-scope="{ row }">
           <Icon
@@ -80,8 +84,10 @@
       />
     </div>
 
-    <DetailAttendeesModal ref="refDetailAttendeesModal"
-                          :family-tree="familyTree"/>
+    <DetailAttendeesModal
+      ref="refDetailAttendeesModal"
+      :family-tree="familyTree"
+    />
 
     <CreateOrUpdateModal
       ref="refCreateOrUpdateModal"
@@ -113,7 +119,7 @@ export default {
   components: {
     CreateOrUpdateModal,
     ConfirmModal,
-    DetailAttendeesModal
+    DetailAttendeesModal,
   },
 
   data() {
@@ -122,36 +128,36 @@ export default {
         {
           title: 'STT',
           key: 'stt',
-          width: 70
+          width: 70,
         },
         {
           title: 'Tên sự kiện',
-          key: 'name'
+          key: 'name',
         },
         {
           title: 'Địa điểm',
-          key: 'location'
+          key: 'location',
         },
         {
           title: 'Ngày diễn ra',
           slot: 'date',
-          width: 140
+          width: 140,
         },
         {
           title: 'Mô tả',
-          key: 'description'
+          key: 'description',
         },
         {
           title: 'Số lượng tham gia',
           slot: 'attendees',
-          width: 180
+          width: 180,
         },
         {
           title: 'Hành động',
           slot: 'action',
           width: 150,
-          align: 'center'
-        }
+          align: 'center',
+        },
       ],
       isUpdate: false,
       loading: false,
@@ -160,13 +166,13 @@ export default {
       dataSelected: {},
       query: {
         page: 1,
-        pageSize: 10
+        pageSize: 10,
       },
       total: 0,
       searchValue: '',
       timeRange: [],
       idDelete: null,
-      tabSelected: 'loai-chi'
+      tabSelected: 'loai-chi',
     }
   },
 
@@ -175,7 +181,7 @@ export default {
 
     isAdmin() {
       return !!(this.user && this.user.is_admin)
-    }
+    },
   },
 
   watch: {
@@ -184,8 +190,8 @@ export default {
       deep: true,
       handler() {
         this.getData()
-      }
-    }
+      },
+    },
   },
 
   created() {
@@ -197,8 +203,15 @@ export default {
     if (this.$route.query && this.$route.query.page) {
       this.query.page = this.$route.query.page
     }
-    if (this.$route.query && this.$route.query.date_before && this.$route.query.date_after) {
-      this.timeRange = [formatDate(this.$route.query.date_before), formatDate(this.$route.query.date_after)]
+    if (
+      this.$route.query &&
+      this.$route.query.date_before &&
+      this.$route.query.date_after
+    ) {
+      this.timeRange = [
+        formatDate(this.$route.query.date_before),
+        formatDate(this.$route.query.date_after),
+      ]
     }
   },
 
@@ -207,8 +220,8 @@ export default {
       try {
         this.familyTree = await this.$axios.$get(this.$api.GET_FAMILY_TREE, {
           params: {
-            query_all: true
-          }
+            query_all: true,
+          },
         })
       } catch (e) {
         console.log('error: ', e)
@@ -219,18 +232,18 @@ export default {
       try {
         const query = {
           ...this.query,
-          ...this.$route.query
+          ...this.$route.query,
         }
         this.loading = true
         const res = await this.$axios.$get(this.$api.EVENT, {
           params: {
             ...query,
-          }
+          },
         })
         this.data = res.results.map((item, index) => {
           return {
             ...item,
-            stt: index + 1 + 10 * (this.query.page - 1)
+            stt: index + 1 + 10 * (this.query.page - 1),
           }
         })
         this.total = res.count
@@ -246,20 +259,20 @@ export default {
 
       const query = {
         ...this.$route.query,
-        page
+        page,
       }
 
       this.$router.push({
         query: {
-          ...query
-        }
+          ...query,
+        },
       })
     },
 
     handleSearch() {
       const query = {
         ...this.$route.query,
-        search: this.searchValue
+        search: this.searchValue,
       }
 
       this.query.page = 1
@@ -268,8 +281,8 @@ export default {
 
       this.$router.push({
         query: {
-          ...query
-        }
+          ...query,
+        },
       })
     },
 
@@ -277,7 +290,7 @@ export default {
       const query = {
         ...this.$route.query,
         date_before: convertDateFormat(value[0]),
-        date_after: convertDateFormat(value[1])
+        date_after: convertDateFormat(value[1]),
       }
 
       this.query.page = 1
@@ -287,8 +300,8 @@ export default {
 
       this.$router.push({
         query: {
-          ...query
-        }
+          ...query,
+        },
       })
     },
 
@@ -321,7 +334,7 @@ export default {
         await this.$axios.$delete(`${this.$api.EVENT}${this.idDelete}/`)
         this.$Message.success({
           content: 'Xóa thành thành công',
-          closable: true
+          closable: true,
         })
         this.handleSuccess()
       } catch (e) {
@@ -330,12 +343,12 @@ export default {
         if (e && e.response && e.response.status === 403) {
           this.$Message.error({
             content: 'Không được phép thực hiện hành động này',
-            closable: true
+            closable: true,
           })
         } else {
           this.$Message.error({
             content: 'Xóa thất thất bại',
-            closable: true
+            closable: true,
           })
         }
       }
@@ -346,7 +359,9 @@ export default {
     },
 
     Attendees(row) {
-      return row && row.attendees && row.attendees.length > 0 ? row.attendees.length : 0
+      return row && row.attendees && row.attendees.length > 0
+        ? row.attendees.length
+        : 0
     },
 
     handleShowAttendees(row) {
@@ -357,8 +372,8 @@ export default {
     handleClickTab(value) {
       if (value === 'chi') this.$router.push('/tai-chinh/chi')
       else if (value === 'loai-chi') this.$router.push('/tai-chinh/loai-chi')
-    }
-  }
+    },
+  },
 }
 </script>
 <style lang="less">
@@ -412,9 +427,7 @@ export default {
 }
 
 .text-primary {
-  color: #0052CC;
-  fill: #0052CC;
+  color: #0052cc;
+  fill: #0052cc;
 }
-
-
 </style>

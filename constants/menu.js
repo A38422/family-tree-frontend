@@ -84,5 +84,13 @@ const menu = [
     styleIcon: {},
     path: '/su-kien',
   },
+  {
+    key: '4',
+    title: 'Quản lý tài khoản',
+    icon: 'ios-people',
+    styleIcon: {},
+    path: '/quan-ly-tai-khoan',
+    isAdmin: true,
+  },
 ]
 export default menu

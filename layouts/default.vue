@@ -14,9 +14,14 @@
           </div>
           <div class="layout-nav">
             <NuxtLink to="/profile">
-              <Avatar v-if="user && user.img" size="32" :src="user.img" :style="{
+              <Avatar
+                v-if="user && user.img"
+                size="32"
+                :src="user.img"
+                :style="{
                   marginRight: '5px',
-                }"/>
+                }"
+              />
               <Avatar
                 v-else
                 size="32"
@@ -146,7 +151,10 @@ export default {
     ...mapGetters(['user']),
 
     menu() {
-      return menu
+      if (this.user && this.user.is_admin) {
+        return menu
+      }
+      return menu.filter((item) => !item.isAdmin)
     },
 
     rotateIcon() {
@@ -202,7 +210,10 @@ export default {
       }
     }
 
-    if (this.$route.path.includes('/tai-chinh/tai-tro') || this.$route.path.includes('/tai-chinh/muc-thu')) {
+    if (
+      this.$route.path.includes('/tai-chinh/tai-tro') ||
+      this.$route.path.includes('/tai-chinh/muc-thu')
+    ) {
       this.activeSidebar = '2-1'
       this.openNames = ['2']
     }
@@ -405,3 +416,7 @@ export default {
 </style>
 
 <!--.\node_modules\.bin\eslint ** --fix-->
+<!--"@commitlint/cli": "^17.1.2",-->
+<!--"@commitlint/config-conventional": "^17.1.0",-->
+<!--prettier-->
+<!--eslint-config-prettier-->

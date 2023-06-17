@@ -6,7 +6,7 @@
     </Tabs>
     <div class="header-table">
       <div :style="{ display: 'flex', gap: '10px' }">
-        <div >
+        <div>
           <span class="mr-5">Tìm kiếm</span>
           <Input
             v-model="searchValue"
@@ -20,13 +20,15 @@
         </div>
         <div>
           <span>Thời gian</span>
-          <DatePicker :value="timeRange"
-                      format="dd/MM/yyyy"
-                      type="daterange"
-                      placement="bottom-end"
-                      placeholder="Bắt đầu - Kết thúc"
-                      :style="{ width: '200px' }"
-                      @on-change="handleChangeTime"></DatePicker>
+          <DatePicker
+            :value="timeRange"
+            format="dd/MM/yyyy"
+            type="daterange"
+            placement="bottom-end"
+            placeholder="Bắt đầu - Kết thúc"
+            :style="{ width: '200px' }"
+            @on-change="handleChangeTime"
+          ></DatePicker>
         </div>
       </div>
       <Button v-if="isAdmin" type="success" @click="openModal(false)">
@@ -183,8 +185,15 @@ export default {
       this.searchValue = this.$route.query.search
     if (this.$route.query && this.$route.query.page)
       this.query.page = this.$route.query.page
-    if (this.$route.query && this.$route.query.date_before && this.$route.query.date_after) {
-      this.timeRange = [formatDate(this.$route.query.date_before), formatDate(this.$route.query.date_after)]
+    if (
+      this.$route.query &&
+      this.$route.query.date_before &&
+      this.$route.query.date_after
+    ) {
+      this.timeRange = [
+        formatDate(this.$route.query.date_before),
+        formatDate(this.$route.query.date_after),
+      ]
     }
   },
 
@@ -266,7 +275,7 @@ export default {
       const query = {
         ...this.$route.query,
         date_before: convertDateFormat(value[0]),
-        date_after: convertDateFormat(value[1])
+        date_after: convertDateFormat(value[1]),
       }
 
       this.query.page = 1
@@ -276,8 +285,8 @@ export default {
 
       this.$router.push({
         query: {
-          ...query
-        }
+          ...query,
+        },
       })
     },
 

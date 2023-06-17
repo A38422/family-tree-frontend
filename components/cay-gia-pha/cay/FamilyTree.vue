@@ -87,13 +87,13 @@ export default {
     },
 
     listEducations() {
-      return educations.map(item => {
+      return educations.map((item) => {
         return {
           text: item.label,
-          value: item.value
+          value: item.value,
         }
       })
-    }
+    },
   },
 
   beforeMount() {
@@ -306,7 +306,7 @@ export default {
         const res = await this.$axios.$get(this.$api.GET_FAMILY_TREE, {
           params: {
             query_all: true,
-            ordering: 'id'
+            ordering: 'id',
           },
         })
         this.nodes = res.map((item) => {
@@ -556,7 +556,9 @@ export default {
 
       this.family.editUI.on('button-click', (sender, args) => {
         if (args.name === 'edit') {
-          this.dataEditSelected = this.nodes.find(item => item.id === args.nodeId)
+          this.dataEditSelected = this.nodes.find(
+            (item) => item.id === args.nodeId
+          )
           setTimeout(() => {
             this.family.editUI.hide()
             this.openModal(true)
@@ -678,7 +680,7 @@ export default {
 
       this.$refs.refCreateOrUpdateMemberModal.open()
       this.$refs.refCreateOrUpdateMemberModal.setFormState({
-        ...this.dataEditSelected
+        ...this.dataEditSelected,
       })
 
       this.dataEditSelected = null

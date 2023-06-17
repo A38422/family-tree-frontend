@@ -74,7 +74,7 @@
                 :label="item.name"
               >
                 <span>{{ item.id }}.</span>
-                <Avatar v-if="item.img" :src="item.img" class="mx-5"/>
+                <Avatar v-if="item.img" :src="item.img" class="mx-5" />
                 <Avatar
                   v-else
                   src="http://localhost:8000/media/images/no-avt.png"
@@ -99,7 +99,7 @@
                 :label="item.name"
               >
                 <span>{{ item.id }}.</span>
-                <Avatar v-if="item.img" :src="item.img" class="mx-5"/>
+                <Avatar v-if="item.img" :src="item.img" class="mx-5" />
                 <Avatar
                   v-else
                   src="http://localhost:8000/media/images/no-avt.png"
@@ -124,7 +124,7 @@
                 :label="item.name"
               >
                 <span>{{ item.id }}.</span>
-                <Avatar v-if="item.img" :src="item.img" class="mx-5"/>
+                <Avatar v-if="item.img" :src="item.img" class="mx-5" />
                 <Avatar
                   v-else
                   src="http://localhost:8000/media/images/no-avt.png"
@@ -281,9 +281,9 @@ export default {
     familyTree: {
       type: Array,
       default() {
-        return [];
-      }
-    }
+        return []
+      },
+    },
   },
 
   data() {
@@ -410,22 +410,38 @@ export default {
           })
 
           this.$store.commit('SET_USER', {
-             ...this.formState,
+            ...this.formState,
             generation: gnt,
-            fid: this.formState.fid ? {
-              id: this.familyTree.find(item => item.id === this.formState.fid).id,
-              name: this.familyTree.find(item => item.id === this.formState.fid).name
-            } : null,
-            mid: this.formState.mid ? {
-              id: this.familyTree.find(item => item.id === this.formState.mid).id,
-              name: this.familyTree.find(item => item.id === this.formState.mid).name
-            } : null,
-            pids: this.formState.pids ? this.familyTree.filter(item => item.id === this.formState.pids).map(item => {
-              return {
-                id: item.id,
-                name: item.name
-              }
-            }) : [],
+            fid: this.formState.fid
+              ? {
+                  id: this.familyTree.find(
+                    (item) => item.id === this.formState.fid
+                  ).id,
+                  name: this.familyTree.find(
+                    (item) => item.id === this.formState.fid
+                  ).name,
+                }
+              : null,
+            mid: this.formState.mid
+              ? {
+                  id: this.familyTree.find(
+                    (item) => item.id === this.formState.mid
+                  ).id,
+                  name: this.familyTree.find(
+                    (item) => item.id === this.formState.mid
+                  ).name,
+                }
+              : null,
+            pids: this.formState.pids
+              ? this.familyTree
+                  .filter((item) => item.id === this.formState.pids)
+                  .map((item) => {
+                    return {
+                      id: item.id,
+                      name: item.name,
+                    }
+                  })
+              : [],
           })
 
           this.loading = false

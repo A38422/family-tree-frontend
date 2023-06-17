@@ -124,7 +124,7 @@ export default {
               show: true,
               textBorderWidth: 2,
               position: 'outside',
-              formatter: '{c} ({d}%)'
+              formatter: '{c} ({d}%)',
             },
           },
         ],

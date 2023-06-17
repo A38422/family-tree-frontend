@@ -6,20 +6,26 @@
     class-name="vertical-center-modal"
   >
     <div class="list-detail-attendees">
-<!--      <div v-for="item in attendees"-->
-<!--           :key="item">-->
-<!--        {{ findById(item) }}}-->
-<!--      </div>-->
+      <!--      <div v-for="item in attendees"-->
+      <!--           :key="item">-->
+      <!--        {{ findById(item) }}}-->
+      <!--      </div>-->
       <List>
-        <ListItem v-for="item in attendees"
-                  :key="item">
-          <ListItemMeta v-if="findById(item)"
-                        :avatar="findById(item).img || 'http://localhost:8000/media/images/no-avt.png'"
-                        :title="findById(item).name"/>
+        <ListItem v-for="item in attendees" :key="item">
+          <ListItemMeta
+            v-if="findById(item)"
+            :avatar="
+              findById(item).img ||
+              'http://localhost:8000/media/images/no-avt.png'
+            "
+            :title="findById(item).name"
+          />
           <template slot="action">
             <li>
-              <NuxtLink :to="`/cay-gia-pha/danh-sach?search=${findById(item).name}`"
-                        target="_blank">
+              <NuxtLink
+                :to="`/cay-gia-pha/danh-sach?search=${findById(item).name}`"
+                target="_blank"
+              >
                 Thông tin chi tiết
               </NuxtLink>
             </li>
@@ -36,7 +42,6 @@
 </template>
 
 <script>
-
 export default {
   name: 'DetailAttendeesModal',
 
@@ -45,14 +50,14 @@ export default {
       type: Array,
       default() {
         return []
-      }
-    }
+      },
+    },
   },
 
   data() {
     return {
       visible: false,
-      attendees: []
+      attendees: [],
     }
   },
 
@@ -70,17 +75,15 @@ export default {
     },
 
     findById(id) {
-      return id &&
-      this.familyTree.find(item => item.id === id)
-        ? this.familyTree.find(item => item.id === id)
+      return id && this.familyTree.find((item) => item.id === id)
+        ? this.familyTree.find((item) => item.id === id)
         : false
     },
 
     setData(data) {
       this.attendees = data
-    }
-  }
-
+    },
+  },
 }
 </script>
 <style lang="less">

@@ -59,13 +59,16 @@
           </FormItem>
           <div v-if="!isUpdate" class="flex-row">
             <div :style="{ width: '130px' }">Tạo tài khoản?</div>
-            <iSwitch v-model="isCreateLogin" size="small" @on-change="handleChangeSwitch"/>
+            <iSwitch
+              v-model="isCreateLogin"
+              size="small"
+              @on-change="handleChangeSwitch"
+            />
           </div>
-          <br>
+          <br />
           <div v-if="!isUpdate && isCreateLogin">
             <FormItem label="Tài khoản" prop="username">
-              <Input v-model="formState.username"
-                     placeholder="Nhập tài khoản">
+              <Input v-model="formState.username" placeholder="Nhập tài khoản">
               </Input>
             </FormItem>
             <FormItem label="Mật khẩu" prop="password">
@@ -73,16 +76,17 @@
                 v-model="formState.password"
                 type="password"
                 password
-                placeholder="Nhập mật khẩu">
+                placeholder="Nhập mật khẩu"
+              >
               </Input>
             </FormItem>
-            <FormItem label="Nhập lại mật khẩu"
-                      prop="rePassword">
+            <FormItem label="Nhập lại mật khẩu" prop="rePassword">
               <Input
                 v-model="formState.rePassword"
                 type="password"
                 password
-                placeholder="Nhập lại mật khẩu">
+                placeholder="Nhập lại mật khẩu"
+              >
               </Input>
             </FormItem>
           </div>
@@ -103,7 +107,7 @@
                 :label="item.name"
               >
                 <span>{{ item.id }}.</span>
-                <Avatar v-if="item.img" :src="item.img" class="mx-5"/>
+                <Avatar v-if="item.img" :src="item.img" class="mx-5" />
                 <Avatar
                   v-else
                   src="http://localhost:8000/media/images/no-avt.png"
@@ -128,7 +132,7 @@
                 :label="item.name"
               >
                 <span>{{ item.id }}.</span>
-                <Avatar v-if="item.img" :src="item.img" class="mx-5"/>
+                <Avatar v-if="item.img" :src="item.img" class="mx-5" />
                 <Avatar
                   v-else
                   src="http://localhost:8000/media/images/no-avt.png"
@@ -153,7 +157,7 @@
                 :label="item.name"
               >
                 <span>{{ item.id }}.</span>
-                <Avatar v-if="item.img" :src="item.img" class="mx-5"/>
+                <Avatar v-if="item.img" :src="item.img" class="mx-5" />
                 <Avatar
                   v-else
                   src="http://localhost:8000/media/images/no-avt.png"
@@ -361,9 +365,7 @@ export default {
     rules() {
       return {
         name: [
-          { required: true,
-            message: 'Vui lòng nhập họ tên',
-            trigger: 'blur' },
+          { required: true, message: 'Vui lòng nhập họ tên', trigger: 'blur' },
         ],
         gender: [
           {
@@ -461,12 +463,15 @@ export default {
           if (this.formState.generation || this.formState.generation === '') {
             delete this.formState.generation
           }
-          const createUser = this.formState.username && this.formState.password && this.formState.rePassword
-            ? {
-              username: this.formState.username,
-              password: this.formState.password
-            }
-            : null
+          const createUser =
+            this.formState.username &&
+            this.formState.password &&
+            this.formState.rePassword
+              ? {
+                  username: this.formState.username,
+                  password: this.formState.password,
+                }
+              : null
           await this.$axios[method](sourceApi, {
             ...this.formState,
             pids: pid,
@@ -492,7 +497,12 @@ export default {
             content: 'Không được phép thực hiện hành động này',
             closable: true,
           })
-        } else if (e && e.response && e.response.data && e.response.data[0].includes('Tài khoản')) {
+        } else if (
+          e &&
+          e.response &&
+          e.response.data &&
+          e.response.data[0].includes('Tài khoản')
+        ) {
           this.$Message.error({
             content: e.response.data[0],
             closable: true,
@@ -511,7 +521,11 @@ export default {
       if (!value) {
         return callback(new Error('Vui lòng nhập mật khẩu'))
       } else if (!passwordRegex.test(value)) {
-        return callback(new Error('Mật khẩu phải từ 8 ký tự bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt'))
+        return callback(
+          new Error(
+            'Mật khẩu phải từ 8 ký tự bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt'
+          )
+        )
       }
       callback()
     },
@@ -595,7 +609,7 @@ export default {
               isAdmin: data.is_admin ? 'admin' : 'member',
               username: null,
               password: null,
-              rePassword: null
+              rePassword: null,
             }
           : {
               generation: '',
@@ -616,7 +630,7 @@ export default {
               achievement: null,
               username: null,
               password: null,
-              rePassword: null
+              rePassword: null,
             }
 
       this.defaultList =
