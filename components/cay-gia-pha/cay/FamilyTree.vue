@@ -314,7 +314,7 @@ export default {
             ...item,
             img: item.img
               ? item.img
-              : 'http://localhost:8000/media/images/no-avt.png',
+              : 'https://i.imgur.com/WzMrY0n.png',
             tags:
               !item.pids || item.pids.length === 0
                 ? item.gender === 'male'

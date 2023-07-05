@@ -51,7 +51,7 @@
             <Avatar v-if="row.member.img" :src="row.member.img" />
             <Avatar
               v-else
-              src="http://localhost:8000/media/images/no-avt.png"
+              src="https://i.imgur.com/WzMrY0n.png"
             />
             <span class="ml-10">{{ row.member.name }}</span>
           </div>

@@ -77,7 +77,7 @@
                 <Avatar v-if="item.img" :src="item.img" class="mx-5" />
                 <Avatar
                   v-else
-                  src="http://localhost:8000/media/images/no-avt.png"
+                  src="https://i.imgur.com/WzMrY0n.png"
                   class="mx-5"
                 />
                 {{ item.name }}
@@ -102,7 +102,7 @@
                 <Avatar v-if="item.img" :src="item.img" class="mx-5" />
                 <Avatar
                   v-else
-                  src="http://localhost:8000/media/images/no-avt.png"
+                  src="https://i.imgur.com/WzMrY0n.png"
                   class="mx-5"
                 />
                 {{ item.name }}
@@ -127,7 +127,7 @@
                 <Avatar v-if="item.img" :src="item.img" class="mx-5" />
                 <Avatar
                   v-else
-                  src="http://localhost:8000/media/images/no-avt.png"
+                  src="https://i.imgur.com/WzMrY0n.png"
                   class="mx-5"
                 />
                 {{ item.name }}

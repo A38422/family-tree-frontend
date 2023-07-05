@@ -29,7 +29,7 @@
       >
         <template slot="name" slot-scope="{ row }">
           <Avatar v-if="row.img" :src="row.img" />
-          <Avatar v-else src="http://localhost:8000/media/images/no-avt.png" />
+          <Avatar v-else src="https://i.imgur.com/WzMrY0n.png" />
           <span class="ml-10">{{ row.name }}</span>
         </template>
         <template slot="gender" slot-scope="{ row }">

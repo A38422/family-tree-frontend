@@ -16,7 +16,7 @@
             v-if="findById(item)"
             :avatar="
               findById(item).img ||
-              'http://localhost:8000/media/images/no-avt.png'
+              'https://i.imgur.com/WzMrY0n.png'
             "
             :title="findById(item).name"
           />
