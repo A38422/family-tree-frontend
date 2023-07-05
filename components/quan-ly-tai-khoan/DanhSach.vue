@@ -1,10 +1,5 @@
 <template>
-  <div class="list-thu">
-    <Tabs :value="tabSelected" :animated="false" @on-click="handleClickTab">
-      <TabPane label="Thu" name="thu"></TabPane>
-      <TabPane label="Tài trợ" name="tai-tro"></TabPane>
-      <TabPane label="Thiết lập mức thu" name="muc-thu"></TabPane>
-    </Tabs>
+  <div class="list-account">
     <div class="header-table">
       <div :style="{ display: 'flex', gap: '10px' }">
         <div>
@@ -46,43 +41,33 @@
         :data="data"
         :loading="loading"
       >
-        <template slot="name" slot-scope="{ row }">
-          <div v-if="row && row.member">
-            <Avatar v-if="row.member.img" :src="row.member.img" />
-            <Avatar
-              v-else
-              src="http://localhost:8000/media/images/no-avt.png"
-            />
-            <span class="ml-10">{{ row.member.name }}</span>
-          </div>
-          <div v-else>-</div>
-        </template>
-        <template slot="year_contributor" slot-scope="{ row }">
-          <span>{{ row && row.contributor ? row.contributor.year : '-' }}</span>
-        </template>
-        <template slot="date" slot-scope="{ row }">
+        <template slot="date_joined" slot-scope="{ row }">
           <span>{{ format(row) }}</span>
         </template>
-        <template slot="amount" slot-scope="{ row }">
-          <span>{{ parseAmount(row) }}</span>
+        <template slot="role" slot-scope="{ row }">
+          <span>{{ role(row) }}</span>
+        </template>
+        <template slot="status" slot-scope="{ row }">
+<!--          <span>{{ row.is_active ? 'Hoạt động' : 'Chặn' }}</span>-->
+          <iSwitch
+            v-model="row.is_active"
+            :loading="loadingSwitch"
+            true-color="#13ce66"
+            false-color="#ff4949"
+            :before-change="handleBeforeChange"
+            @on-change="handleChangeSwitch(row)"
+          >
+          </iSwitch>
         </template>
         <template slot="action" slot-scope="{ row }">
-          <Icon
-            v-if="isAdmin"
-            type="md-create"
-            size="20"
-            color="#2d8cf0"
-            class="mr-5 cursor"
-            @click="edit(row)"
-          />
-          <Icon
-            v-if="isAdmin"
-            type="md-trash"
-            size="20"
-            color="#ed4014"
-            class="cursor"
-            @click="remove(row)"
-          />
+          <Dropdown v-if="isAdmin" @on-click="handleClickDrp($event, row)">
+            <Icon type="md-more" class="cursor"></Icon>
+            <DropdownMenu slot="list">
+              <DropdownItem name="pw">Đổi mật khẩu</DropdownItem>
+              <DropdownItem name="role">Thay đổi vai trò</DropdownItem>
+              <DropdownItem name="delete">Xóa</DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
         </template>
       </Table>
     </div>
@@ -97,11 +82,13 @@
       />
     </div>
 
+    <ChangePasswordModal
+ref="refChangePasswordModal"
+                         @on-ok="handleSuccess"/>
+
     <CreateOrUpdateModal
       ref="refCreateOrUpdateModal"
-      :data-member="dataMember"
-      :data-sponsor="dataSponsor"
-      :data-contribution-level="dataContributionLevel"
+      :family-tree="familyTree"
       :data-edit="dataSelected"
       :is-update="isUpdate"
       @on-ok="handleSuccess"
@@ -110,22 +97,24 @@
     <ConfirmModal
       ref="refConfirmModal"
       title="Xác nhận xoá"
-      text="Hành động này sẽ xóa khoản thu này. Bạn đồng ý thực hiện?"
-      @on-ok="deleteDanhSachThu"
+      text="Hành động này sẽ xóa loại tài khoản này. Bạn đồng ý thực hiện?"
+      @on-ok="deleteUser"
     />
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-import { formatDate, convertDateFormat } from '../../../utils/dateFormatter'
-import ConfirmModal from '../../base/ConfirmModal'
-import CreateOrUpdateModal from './CreateOrUpdateModal'
+import { convertDateFormat, formatDate } from '~/utils/dateFormatter'
+import CreateOrUpdateModal from '~/components/quan-ly-tai-khoan/CreateOrUpdateModal.vue'
+import ConfirmModal from '~/components/base/ConfirmModal.vue'
+import ChangePasswordModal from '~/components/quan-ly-tai-khoan/ChangePasswordModal.vue'
 
 export default {
   name: 'DanhSach',
 
   components: {
+    ChangePasswordModal,
     CreateOrUpdateModal,
     ConfirmModal,
   },
@@ -135,9 +124,7 @@ export default {
       isUpdate: false,
       loading: false,
       data: [],
-      dataContributionLevel: [],
-      dataSponsor: [],
-      dataMember: [],
+      familyTree: [],
       dataSelected: {},
       query: {
         page: 1,
@@ -147,7 +134,8 @@ export default {
       searchValue: '',
       timeRange: [],
       idDelete: null,
-      tabSelected: 'thu',
+      tabSelected: 'loai-chi',
+      loadingSwitch: false
     }
   },
 
@@ -158,13 +146,30 @@ export default {
       return !!(this.user && this.user.is_admin)
     },
 
-    listContributor() {
-      return this.dataContributionLevel.map((item) => {
-        return {
-          value: item.year,
-          label: item.year,
+    listRole() {
+      return [
+        {
+          value: true,
+          label: 'Hội đồng gia tộc',
+        },
+        {
+          value: false,
+          label: 'Thành viên',
         }
-      })
+      ]
+    },
+
+    listStatus() {
+      return [
+        {
+          value: false,
+          label: 'Chặn',
+        },
+        {
+          value: true,
+          label: 'Hoạt động',
+        }
+      ]
     },
 
     columns() {
@@ -172,28 +177,32 @@ export default {
         {
           title: 'STT',
           key: 'stt',
-          width: '70px',
+          width: 70,
         },
         {
-          title: 'Thành viên',
-          slot: 'name',
+          title: 'Tên tài khoản',
+          key: 'username',
         },
         {
-          title: 'Mức thu',
-          slot: 'year_contributor',
-          filters: this.listContributor,
+          title: 'Vai trò',
+          slot: 'role',
+          filters: this.listRole,
           filterMultiple: false,
           filterRemote: (value) =>
-            this.handleFilter('contributor__year', value),
+            this.handleFilter('is_superuser', value),
         },
         {
-          title: 'Số tiền (VNĐ)',
-          slot: 'amount',
+          title: 'Trạng thái',
+          slot: 'status',
+          // width: 150,
+          filters: this.listStatus,
+          filterMultiple: false,
+          filterRemote: (value) =>
+            this.handleFilter('is_active', value),
         },
         {
-          title: 'Ngày thu',
-          slot: 'date',
-          width: '150px',
+          title: 'Ngày tạo',
+          slot: 'date_joined',
         },
         {
           title: 'Hành động',
@@ -202,7 +211,7 @@ export default {
           align: 'center',
         },
       ]
-    },
+    }
   },
 
   watch: {
@@ -216,8 +225,8 @@ export default {
   },
 
   created() {
-    this.getDataMember()
-    this.getDataContributionLevel()
+    this.getAllData()
+
     if (this.$route.query && this.$route.query.search) {
       this.searchValue = this.$route.query.search
     }
@@ -226,40 +235,24 @@ export default {
     }
     if (
       this.$route.query &&
-      this.$route.query.date_before &&
-      this.$route.query.date_after
+      this.$route.query.date_joined_before &&
+      this.$route.query.date_joined_after
     ) {
       this.timeRange = [
-        formatDate(this.$route.query.date_before),
-        formatDate(this.$route.query.date_after),
+        formatDate(this.$route.query.date_joined_before),
+        formatDate(this.$route.query.date_joined_after),
       ]
     }
   },
 
   methods: {
-    async getDataMember() {
+    async getAllData() {
       try {
-        this.loading = true
-        const res = await this.$axios.$get(this.$api.GET_FAMILY_TREE, {
+        this.familyTree = await this.$axios.$get(this.$api.GET_FAMILY_TREE, {
           params: {
             query_all: true,
           },
         })
-        this.dataMember = res
-      } catch (e) {
-        console.log('error: ', e)
-      }
-    },
-
-    async getDataContributionLevel() {
-      try {
-        this.loading = true
-        const res = await this.$axios.$get(this.$api.CONTRIBUTION, {
-          params: {
-            query_all: true,
-          },
-        })
-        this.dataContributionLevel = res
       } catch (e) {
         console.log('error: ', e)
       }
@@ -272,11 +265,9 @@ export default {
           ...this.$route.query,
         }
         this.loading = true
-        const res = await this.$axios.$get(this.$api.INCOMES, {
+        const res = await this.$axios.$get(this.$api.USER, {
           params: {
             ...query,
-            ordering: '-id',
-            contributor__isnull: false,
           },
         })
         this.data = res.results.map((item, index) => {
@@ -328,14 +319,14 @@ export default {
     handleChangeTime(value) {
       const query = {
         ...this.$route.query,
-        date_before: convertDateFormat(value[0]),
-        date_after: convertDateFormat(value[1]),
+        date_joined_before: convertDateFormat(value[0]),
+        date_joined_after: convertDateFormat(value[1]),
       }
 
       this.query.page = 1
       if (query.page) delete query.page
-      if (query.date_before === '') delete query.date_before
-      if (query.date_after === '') delete query.date_after
+      if (query.date_joined_before === '') delete query.date_joined_before
+      if (query.date_joined_after === '') delete query.date_joined_after
 
       this.$router.push({
         query: {
@@ -349,11 +340,19 @@ export default {
         ...this.$route.query,
       }
 
-      if (type === 'contributor__year') {
+      if (type === 'is_superuser') {
         if (value.length > 0) {
-          query.contributor__year = value[0]
+          query.is_superuser = value[0]
         } else {
-          delete query.contributor__year
+          delete query.is_superuser
+        }
+      }
+
+      if (type === 'is_active') {
+        if (value.length > 0) {
+          query.is_active = value[0]
+        } else {
+          delete query.is_active
         }
       }
 
@@ -366,8 +365,25 @@ export default {
     },
 
     edit(row) {
-      this.dataSelected = row
+      this.dataSelected = {
+        id: row.id,
+        username: row.username,
+        password: '',
+        rePassword: '',
+        role: row.is_superuser ? 'admin' : 'member',
+        member: this.familyTree.find(item => item.user === row.id) ?
+          this.familyTree.find(item => item.user === row.id).id : null
+      }
       this.openModal(true)
+    },
+
+    changePw(row) {
+      this.$refs.refChangePasswordModal.open()
+      this.$refs.refChangePasswordModal.setFormState({
+        id: row.id,
+        password: null,
+        rePassword: null,
+      })
     },
 
     remove(row) {
@@ -375,57 +391,34 @@ export default {
       this.$refs.refConfirmModal.open()
     },
 
+    handleClickDrp(type, row) {
+      if (type === 'pw') {
+        this.changePw(row)
+      } else if (type === 'role') {
+        this.edit(row)
+      } else if (type === 'delete') {
+        this.remove(row)
+      }
+    },
+
     openModal(update) {
       this.isUpdate = update
 
       this.$refs.refCreateOrUpdateModal.open()
-      this.$refs.refCreateOrUpdateModal.type =
-        this.dataSelected.member || !update ? 'Thu định kỳ' : 'Tài trợ'
-      this.$refs.refCreateOrUpdateModal.setFormState({
-        id: this.dataSelected.id,
-        date: this.dataSelected.date,
-        member: this.dataSelected.member ? this.dataSelected.member.id : null,
-        sponsor: this.dataSelected.sponsor
-          ? this.dataSelected.sponsor.id
-          : null,
-        contributor: this.dataSelected.contributor
-          ? this.dataSelected.contributor.id
-          : null,
-      })
+      this.$refs.refCreateOrUpdateModal.setFormState({ ...this.dataSelected })
 
       this.dataSelected = {}
     },
 
     handleSuccess() {
       this.getData()
+      this.getAllData()
     },
 
-    format(row) {
-      if (row && row.date) {
-        return formatDate(row && row.date)
-      }
-      return '-'
-    },
-
-    parseAmount(row) {
-      if (row && row.contributor) {
-        return `${Number(row.contributor.amount)}`.replace(
-          /\B(?=(\d{3})+(?!\d))/g,
-          ','
-        )
-      } else if (row && row.sponsor) {
-        return `${Number(row.sponsor.amount)}`.replace(
-          /\B(?=(\d{3})+(?!\d))/g,
-          ','
-        )
-      }
-      return '-'
-    },
-
-    async deleteDanhSachThu() {
+    async deleteUser() {
       try {
         this.loading = true
-        await this.$axios.$delete(`${this.$api.INCOMES}${this.idDelete}/`)
+        await this.$axios.$delete(`${this.$api.USER}${this.idDelete}/`)
         this.$Message.success({
           content: 'Xóa thành công',
           closable: true,
@@ -448,16 +441,61 @@ export default {
       }
     },
 
-    handleClickTab(value) {
-      if (value === 'thu') this.$router.push('/tai-chinh/thu')
-      else if (value === 'tai-tro') this.$router.push('/tai-chinh/tai-tro')
-      else if (value === 'muc-thu') this.$router.push('/tai-chinh/muc-thu')
+    format(row) {
+      return row && row.date_joined ? formatDate(row.date_joined) : '-'
     },
+
+    role(row) {
+      return row.is_superuser ? 'Hội đồng gia tộc' : 'Thành viên'
+    },
+
+    handleBeforeChange() {
+      return new Promise((resolve) => {
+        this.$Modal.confirm({
+          title: 'Xác nhận',
+          content: 'Bạn có chắc muốn thực hiện hành động này？',
+          okText: 'Đồng ý',
+          cancelText: 'Hủy',
+          onOk: () => {
+            resolve();
+          }
+        });
+      });
+    },
+
+    async handleChangeSwitch(row) {
+      try {
+        // this.loadingSwitch = true
+        await this.$axios.$patch(`${this.$api.USER}${row.id}/`, {
+          is_active: row.is_active
+        })
+        this.$Message.success({
+          content: 'Cập nhật thành công',
+          closable: true,
+        })
+        // this.loadingSwitch = false
+      } catch (e) {
+        // this.loadingSwitch = false
+        console.log('error', e)
+        row.is_active = !row.is_active
+        if (e && e.response && e.response.status === 403) {
+          this.$Message.error({
+            content: 'Không được phép thực hiện hành động này',
+            closable: true,
+          })
+        } else {
+          this.$Message.error({
+            content: 'Cập nhật thất bại',
+            closable: true,
+          })
+        }
+      }
+    }
   },
 }
 </script>
 <style lang="less">
-.list-thu {
+.list-account {
   height: 100%;
   width: 100%;
   display: flex;
@@ -504,5 +542,10 @@ export default {
     /*max-width: 300px;*/
     width: 200px;
   }
+}
+
+.text-primary {
+  color: #0052cc;
+  fill: #0052cc;
 }
 </style>

@@ -96,7 +96,7 @@
     <ConfirmModal
       ref="refConfirmModal"
       title="Xác nhận xoá"
-      text="Hành động này sẽ xóa loại chi này. Bạn đồng ý thực hiện?"
+      text="Hành động này sẽ xóa khoản chi này. Bạn đồng ý thực hiện?"
       @on-ok="deleteChi"
     />
   </div>
@@ -318,7 +318,7 @@ export default {
         this.loading = true
         await this.$axios.$delete(`${this.$api.EXPENSES}${this.idDelete}/`)
         this.$Message.success({
-          content: 'Xóa thành thành công',
+          content: 'Xóa thành công',
           closable: true,
         })
         this.handleSuccess()
@@ -332,7 +332,7 @@ export default {
           })
         } else {
           this.$Message.error({
-            content: 'Xóa thất thất bại',
+            content: 'Xóa thất bại',
             closable: true,
           })
         }

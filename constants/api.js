@@ -38,6 +38,10 @@ const apiUrl = {
 
   // event
   EVENT: 'api/event/',
+
+  // user
+  USER: 'api/user/',
+  CHANGE_PW: 'api/user/change-password/',
 }
 
 export default apiUrl

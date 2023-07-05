@@ -51,5 +51,9 @@ const breadCrumb = {
     title: 'Sự kiện',
     disabled: false,
   },
+  'quan-ly-tai-khoan': {
+    title: 'Quản lý tài khoản',
+    disabled: false,
+  },
 }
 export default breadCrumb

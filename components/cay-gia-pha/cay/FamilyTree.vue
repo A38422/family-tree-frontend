@@ -619,7 +619,7 @@ export default {
             )
             this.loading = false
             this.$Message.success({
-              content: 'Xóa thành thành công',
+              content: 'Xóa thành công',
               closable: true,
             })
             this.getData()
@@ -633,7 +633,7 @@ export default {
               })
             } else {
               this.$Message.error({
-                content: 'Xóa thất thất bại',
+                content: 'Xóa thất bại',
                 closable: true,
               })
             }
@@ -649,7 +649,7 @@ export default {
             await this.$axios.$delete(`${this.$api.DELETE_FAMILY_TREE}${args}/`)
             this.loading = false
             this.$Message.success({
-              content: 'Xóa thành thành công',
+              content: 'Xóa thành công',
               closable: true,
             })
             this.getData()
@@ -663,7 +663,7 @@ export default {
               })
             } else {
               this.$Message.error({
-                content: 'Xóa thất thất bại',
+                content: 'Xóa thất bại',
                 closable: true,
               })
             }

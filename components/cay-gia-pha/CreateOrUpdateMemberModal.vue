@@ -80,12 +80,12 @@
               >
               </Input>
             </FormItem>
-            <FormItem label="Nhập lại mật khẩu" prop="rePassword">
+            <FormItem label="Xác nhận mật khẩu" prop="rePassword">
               <Input
                 v-model="formState.rePassword"
                 type="password"
                 password
-                placeholder="Nhập lại mật khẩu"
+                placeholder="Nhập mật khẩu xác nhận"
               >
               </Input>
             </FormItem>
@@ -532,7 +532,7 @@ export default {
 
     validateRePass(rule, value, callback) {
       if (!value) {
-        return callback(new Error('Vui lòng nhập lại mật khẩu'))
+        return callback(new Error('Vui lòng nhập mật khẩu xác nhận'))
       } else if (value !== this.formState.password) {
         return callback(new Error('Mật khẩu không trùng khớp'))
       }

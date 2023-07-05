@@ -27,6 +27,10 @@
         <Icon type="md-create" />
         Chỉnh sửa
       </Button>
+      <Button type="info" ghost @click="handleOpenPwModal">
+        <Icon type="md-key" />
+        Đổi mật khẩu
+      </Button>
     </div>
 
     <div :style="{ width: '70%', margin: '7% 0 7% 20%' }">
@@ -121,6 +125,8 @@
       :family-tree="familyTree"
     />
 
+    <ChangePwModal ref="refChangePwModal"/>
+
     <Modal
       v-model="visibleImg"
       title=""
@@ -143,14 +149,16 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { mappingEducations, mappingGender } from '../../constants/mapping'
-import { formatDate } from '../../utils/dateFormatter'
-import UpdateModal from './UpdateModal'
+import { formatDate } from '~/utils/dateFormatter'
+import { mappingEducations, mappingGender } from '~/constants/mapping'
+import UpdateModal from '~/components/profile/UpdateModal.vue'
+import ChangePwModal from '~/components/profile/ChangePwModal.vue'
 
 export default {
   name: 'UserProfile',
 
   components: {
+    ChangePwModal,
     UpdateModal,
   },
 
@@ -195,6 +203,16 @@ export default {
               : [],
         })
       }
+    },
+
+    handleOpenPwModal() {
+      this.$refs.refChangePwModal.open()
+      this.$refs.refChangePwModal.setFormState({
+        id: this.user.user,
+        oldPassword: null,
+        newPassword: null,
+        reNewPassword: null
+      })
     },
 
     async getAllData() {

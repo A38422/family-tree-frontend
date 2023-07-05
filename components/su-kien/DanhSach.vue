@@ -1,10 +1,11 @@
 <template>
   <div class="list-event">
-    <!--    <Tabs :value="tabSelected" :animated="false" @on-click="handleClickTab">-->
-    <!--      <TabPane label="Chi" name="chi"></TabPane>-->
-    <!--      <TabPane label="Loại chi" name="loai-chi"></TabPane>-->
-    <!--    </Tabs>-->
-    <div class="header-table">
+    <Tabs :value="tabSelected" :animated="true" @on-click="handleClickTab">
+      <TabPane label="Bảng" name="table"></TabPane>
+      <TabPane label="Lịch" name="calendar"></TabPane>
+    </Tabs>
+
+    <div v-if="tabSelected === 'table'" class="header-table">
       <div :style="{ display: 'flex', gap: '10px' }">
         <div>
           <span class="mr-5">Tìm kiếm</span>
@@ -37,7 +38,7 @@
       </Button>
     </div>
 
-    <div class="flex-1">
+    <div v-if="tabSelected === 'table'" class="flex-1">
       <Table
         size="large"
         max-height="600"
@@ -74,7 +75,7 @@
       </Table>
     </div>
 
-    <div class="custom-navigate">
+    <div v-if="tabSelected === 'table'" class="custom-navigate">
       <span class="mr-10">Tổng: {{ total }}</span>
       <Page
         :current="+query.page"
@@ -83,6 +84,11 @@
         @on-change="handleChangePage"
       />
     </div>
+
+    <BaseCalendar v-else
+                  ref="refCalendar"
+                  :events="events"
+                  class="flex-1"/>
 
     <DetailAttendeesModal
       ref="refDetailAttendeesModal"
@@ -100,7 +106,7 @@
     <ConfirmModal
       ref="refConfirmModal"
       title="Xác nhận xoá"
-      text="Hành động này sẽ xóa loại chi này. Bạn đồng ý thực hiện?"
+      text="Hành động này sẽ xóa sự kiện này. Bạn đồng ý thực hiện?"
       @on-ok="deleteEvent"
     />
   </div>
@@ -112,11 +118,13 @@ import { convertDateFormat, formatDate } from '~/utils/dateFormatter'
 import CreateOrUpdateModal from '~/components/su-kien/CreateOrUpdateModal.vue'
 import ConfirmModal from '~/components/base/ConfirmModal.vue'
 import DetailAttendeesModal from '~/components/su-kien/DetailAttendeesModal.vue'
+import BaseCalendar from '~/components/base/BaseCalendar.vue'
 
 export default {
   name: 'DanhSach',
 
   components: {
+    BaseCalendar,
     CreateOrUpdateModal,
     ConfirmModal,
     DetailAttendeesModal,
@@ -161,6 +169,7 @@ export default {
       ],
       isUpdate: false,
       loading: false,
+      events: [],
       data: [],
       familyTree: [],
       dataSelected: {},
@@ -172,7 +181,7 @@ export default {
       searchValue: '',
       timeRange: [],
       idDelete: null,
-      tabSelected: 'loai-chi',
+      tabSelected: 'table',
     }
   },
 
@@ -213,6 +222,10 @@ export default {
         formatDate(this.$route.query.date_after),
       ]
     }
+
+    if (this.$route.query && this.$route.query.tab === 'calendar') {
+      this.tabSelected = this.$route.query.tab
+    }
   },
 
   methods: {
@@ -222,6 +235,17 @@ export default {
           params: {
             query_all: true,
           },
+        })
+        this.events = await this.$axios.$get(this.$api.EVENT, {
+          params: {
+            query_all: true,
+          },
+        })
+        this.events = this.events.map(item => {
+          return {
+            title: item.name,
+            start: item.date
+          }
         })
       } catch (e) {
         console.log('error: ', e)
@@ -326,6 +350,7 @@ export default {
 
     handleSuccess() {
       this.getData()
+      this.getAllData()
     },
 
     async deleteEvent() {
@@ -333,7 +358,7 @@ export default {
         this.loading = true
         await this.$axios.$delete(`${this.$api.EVENT}${this.idDelete}/`)
         this.$Message.success({
-          content: 'Xóa thành thành công',
+          content: 'Xóa thành công',
           closable: true,
         })
         this.handleSuccess()
@@ -347,7 +372,7 @@ export default {
           })
         } else {
           this.$Message.error({
-            content: 'Xóa thất thất bại',
+            content: 'Xóa thất bại',
             closable: true,
           })
         }
@@ -370,8 +395,9 @@ export default {
     },
 
     handleClickTab(value) {
-      if (value === 'chi') this.$router.push('/tai-chinh/chi')
-      else if (value === 'loai-chi') this.$router.push('/tai-chinh/loai-chi')
+      this.tabSelected = value
+      if (value === 'table') this.$router.push('/su-kien')
+      else if (value === 'calendar') this.$router.push('/su-kien?tab=calendar')
     },
   },
 }

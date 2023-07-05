@@ -378,7 +378,7 @@ export default {
           `${this.$api.DELETE_FAMILY_TREE}${this.idDelete}/`
         )
         this.$Message.success({
-          content: 'Xóa thành thành công',
+          content: 'Xóa thành công',
           closable: true,
         })
         this.handleSuccess()
@@ -392,7 +392,7 @@ export default {
           })
         } else {
           this.$Message.error({
-            content: 'Xóa thất thất bại',
+            content: 'Xóa thất bại',
             closable: true,
           })
         }
