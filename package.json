@@ -9,7 +9,6 @@
     "generate": "nuxt generate"
   },
   "dependencies": {
-    "@bachdgvn/sbox-ds": "^0.0.2",
     "@balkangraph/familytree.js": "^1.7.29",
     "@fullcalendar/core": "^6.1.8",
     "@fullcalendar/daygrid": "^6.1.8",
