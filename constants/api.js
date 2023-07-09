@@ -36,6 +36,9 @@ const apiUrl = {
   // family tree statistics
   FAMILY_TREE_STATISTICS: 'api/family-tree-statistics/',
 
+  // unpaid members
+  UNPAID_MEMBERS: 'api/unpaid-members/',
+
   // event
   EVENT: 'api/event/',
 

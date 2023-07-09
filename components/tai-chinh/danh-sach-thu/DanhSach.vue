@@ -31,6 +31,40 @@
             @on-change="handleChangeTime"
           ></DatePicker>
         </div>
+        <div>
+          <span>Mức thu</span>
+          <Select
+            v-model="contributor"
+            placeholder="Chọn mức thu"
+            :style="{ width: '200px' }"
+            @on-change="handleChangeContributor"
+          >
+            <Option
+              v-for="(item, index) in listContributor"
+              :key="index"
+              :value="item.value"
+              :label="item.label"
+            >
+            </Option>
+          </Select>
+        </div>
+        <div>
+          <span>Trạng thái</span>
+          <Select
+            v-model="status"
+            placeholder="Chọn trạng thái"
+            :style="{ width: '200px' }"
+            @on-change="handleChangeStatus"
+          >
+            <Option
+              v-for="(item, index) in listStatus"
+              :key="index"
+              :value="item.value"
+              :label="item.label"
+            >
+            </Option>
+          </Select>
+        </div>
       </div>
       <Button v-if="isAdmin" type="success" @click="openModal(false)">
         <Icon type="md-add" size="18" />
@@ -66,9 +100,14 @@
         <template slot="amount" slot-scope="{ row }">
           <span>{{ parseAmount(row) }}</span>
         </template>
+        <template slot="status">
+          <span :class="status === 'paid' ? 'text-success' : 'text-danger'">
+            {{ status === 'paid' ? 'Đã thu' : 'Chưa thu' }}
+          </span>
+        </template>
         <template slot="action" slot-scope="{ row }">
           <Icon
-            v-if="isAdmin"
+            v-if="isAdmin && status === 'paid'"
             type="md-create"
             size="20"
             color="#2d8cf0"
@@ -76,7 +115,7 @@
             @click="edit(row)"
           />
           <Icon
-            v-if="isAdmin"
+            v-if="isAdmin && status === 'paid'"
             type="md-trash"
             size="20"
             color="#ed4014"
@@ -118,9 +157,9 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { formatDate, convertDateFormat } from '../../../utils/dateFormatter'
 import ConfirmModal from '../../base/ConfirmModal'
 import CreateOrUpdateModal from './CreateOrUpdateModal'
+import { formatDate, convertDateFormat } from '~/utils/dateFormatter'
 
 export default {
   name: 'DanhSach',
@@ -148,6 +187,8 @@ export default {
       timeRange: [],
       idDelete: null,
       tabSelected: 'thu',
+      status: 'paid',
+      contributor: new Date().getFullYear()
     }
   },
 
@@ -181,10 +222,10 @@ export default {
         {
           title: 'Mức thu',
           slot: 'year_contributor',
-          filters: this.listContributor,
-          filterMultiple: false,
-          filterRemote: (value) =>
-            this.handleFilter('contributor__year', value),
+          // filters: this.listContributor,
+          // filterMultiple: false,
+          // filterRemote: (value) =>
+          //   this.handleFilter('contributor__year', value),
         },
         {
           title: 'Số tiền (VNĐ)',
@@ -196,6 +237,11 @@ export default {
           width: '150px',
         },
         {
+          title: 'Trạng thái',
+          slot: 'status',
+          width: '150px',
+        },
+        {
           title: 'Hành động',
           slot: 'action',
           width: 150,
@@ -203,6 +249,19 @@ export default {
         },
       ]
     },
+
+    listStatus() {
+      return [
+        {
+          value: 'paid',
+          label: 'Đã thu',
+        },
+        {
+          value: 'unpaid',
+          label: 'Chưa thu',
+        },
+      ]
+    }
   },
 
   watch: {
@@ -220,6 +279,12 @@ export default {
     this.getDataContributionLevel()
     if (this.$route.query && this.$route.query.search) {
       this.searchValue = this.$route.query.search
+    }
+    if (this.$route.query && this.$route.query.contributor__year) {
+      this.contributor = Number(this.$route.query.contributor__year)
+    }
+    if (this.$route.query && this.$route.query.status) {
+      this.status = this.$route.query.status
     }
     if (this.$route.query && this.$route.query.page) {
       this.query.page = this.$route.query.page
@@ -267,26 +332,51 @@ export default {
 
     async getData() {
       try {
+        if (this.$route.query && this.$route.query.status) {
+          this.status = this.$route.query.status
+        }
         const query = {
           ...this.query,
           ...this.$route.query,
         }
-        this.loading = true
-        const res = await this.$axios.$get(this.$api.INCOMES, {
-          params: {
-            ...query,
-            ordering: '-id',
-            contributor__isnull: false,
-          },
-        })
-        this.data = res.results.map((item, index) => {
-          return {
-            ...item,
-            stt: index + 1 + 10 * (this.query.page - 1),
-          }
-        })
-        this.total = res.count
-        this.loading = false
+        if (this.status === 'paid') {
+          this.loading = true
+          const res = await this.$axios.$get(this.$api.INCOMES, {
+            params: {
+              ...query,
+              ordering: '-id',
+              contributor__isnull: false,
+              contributor__year: this.contributor
+            },
+          })
+          this.data = res.results.map((item, index) => {
+            return {
+              ...item,
+              stt: index + 1 + 10 * (this.query.page - 1),
+            }
+          })
+          this.total = res.count
+          this.loading = false
+        } else {
+          this.loading = true
+          const res = await this.$axios.$get(this.$api.UNPAID_MEMBERS, {
+            params: {
+              ...query,
+              ordering: '-id',
+              contribution_level_year: this.contributor
+            },
+          })
+          this.data = res.results.map((item, index) => {
+            return {
+              member: {
+                ...item
+              },
+              stt: index + 1 + 10 * (this.query.page - 1),
+            }
+          })
+          this.total = res.count
+          this.loading = false
+        }
       } catch (e) {
         console.log('error: ', e)
         this.loading = false
@@ -362,6 +452,40 @@ export default {
 
       this.$router.push({
         query,
+      })
+    },
+
+    handleChangeContributor(value) {
+      const query = {
+        ...this.$route.query,
+        contributor__year: value
+      }
+
+      this.query.page = 1
+      if (query.page) delete query.page
+
+      this.$router.push({
+        query: {
+          ...query,
+        },
+      })
+    },
+
+    handleChangeStatus(value) {
+      const query = {
+        ...this.$route.query,
+      }
+
+      if (value === 'unpaid') {
+        query.status = value
+      } else if (query.status) {
+        delete query.status
+      }
+
+      this.$router.push({
+        query: {
+          ...query,
+        },
       })
     },
 
